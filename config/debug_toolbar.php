@@ -10,7 +10,7 @@ $config['auto_render'] = Kohana::$environment > Kohana::PRODUCTION;
 /*
  * If true, the Debug toolbar will be displayed on page
  */
-$config['toolbar_enabled'] = false;
+$config['toolbar_enabled'] = true;
 /*
  * If true, the debug info will be displayed with Google Chrome Plugin
  */
