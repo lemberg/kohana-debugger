@@ -8,9 +8,18 @@
 $config['auto_render'] = Kohana::$environment > Kohana::PRODUCTION;
 
 /*
+ * If true, the Debug toolbar will be displayed on page
+ */
+$config['toolbar_enabled'] = false;
+/*
+ * If true, the debug info will be displayed with Google Chrome Plugin
+ */
+$config['plugin_enabled'] = true;
+
+/*
  * If true, the toolbar will default to the minimized position
  */
-$config['minimized'] = FALSE;
+$config['toolbar']['minimized'] = FALSE;
 
 /*
  * Log toolbar data to FirePHP
@@ -35,7 +44,7 @@ $config['panels'] = array(
  * Toolbar alignment
  * options: right, left, center
  */
-$config['align'] = 'right';
+$config['toolbar']['align'] = 'right';
 
 /*
  * Secret Key

@@ -57,46 +57,58 @@ abstract class Kohana_Debugtoolbar {
 		{
 			return FALSE;
 		}
+		
+		$config = Kohana::$config->load('debug_toolbar');
+		if (!$config->toolbar_enabled && !$config->plugin_enabled)
+		{
+			return false;
+		}
 
 		$token    = Profiler::start('custom', self::$benchmark_name);
 
 		$template = new View('toolbar');
 
-		$config   = Kohana::$config->load('debug_toolbar');
+		
+		
+		$data = array();
 
 		// Database panel
 		if ($config->panels['database'] === TRUE)
 		{
-			$queries = self::get_queries();
-			$template
+			$data['queries'] = self::get_queries();
+			/*$template
 				->set('queries', $queries['data'])
 				->set('query_count', $queries['count'])
 				->set('total_time', $queries['time'])
-				->set('total_memory', $queries['memory']);
+				->set('total_memory', $queries['memory']);*/
 		}
 
 		// Files panel
 		if ($config->panels['files'] === TRUE)
 		{
-			$template->set('files', self::get_files());
+			$data['files'] = self::get_files();
+			//$template->set('files', $files);
 		}
 
 		// Modules panel
 		if ($config->panels['modules'] === TRUE)
 		{
-			$template->set('modules', self::get_modules());
+			$data['modules'] = self::get_modules();
+			//$template->set('modules', self::get_modules());
 		}
 
 		// Routes panel
 		if ($config->panels['routes'] === TRUE)
 		{
-			$template->set('routes', self::get_routes());
+			$data['routes'] = self::get_routes(Request::initial()->route());
+			//$template->set('routes', self::get_routes());
 		}
 
 		// Custom data
 		if ($config->panels['customs'] === TRUE)
 		{
-			$template->set('customs', self::get_customs());
+			$data['customs'] = self::get_customs();
+			//$template->set('customs', $customs);
 		}
 
 		// FirePHP
@@ -106,17 +118,17 @@ abstract class Kohana_Debugtoolbar {
 		}
 
 		// Set alignment for toolbar
-		switch ($config->align)
+		switch ($config->toolbar["align"])
 		{
 			case 'right':
 			case 'center':
 			case 'left':
-				$template->set('align', $config->align);
+				$template->set('align', $config->toolbar["align"]);
 				break;
 			default:
 				$template->set('align', 'left');
 		}
-
+		
 		// Javascript for toolbar
 		$template->set('scripts', file_get_contents(Kohana::find_file('views', 'toolbar', 'js')));
 
@@ -128,10 +140,23 @@ abstract class Kohana_Debugtoolbar {
 		// Benchmarks panel
 		if ($config->panels['benchmarks'] === TRUE)
 		{
-			$template->set('benchmarks', self::get_benchmarks());
+			$data['benchmarks'] = self::get_benchmarks();
+			//$template->set('benchmarks', self::get_benchmarks());
+		}
+		
+		if ($config->panels['vars'] === TRUE)
+		{
+			$data['vars']['post'] = isset($_POST) ? Debug::vars($_POST) : Debug::vars(array());
+			$data['vars']['get'] = isset($_GET) ? Debug::vars($_GET) : Debug::vars(array());
+			$data['vars']['files'] = isset($_FILES) ? Debug::vars($_FILES) : Debug::vars(array());
+			$data['vars']['server'] = isset($_SERVER) ? Debug::vars($_SERVER) : Debug::vars(array());
+			$data['vars']['cookie'] = isset($_COOKIE) ? Debug::vars($_COOKIE) : Debug::vars(array());
+			$data['vars']['session'] = isset($_SESSION) ? Debug::vars($_SESSION) : Debug::vars(array());
 		}
 
 		$template->set('styles', $styles);
+		
+		$template->set('data', $data);
 
 		echo $template->render();
 	}
@@ -289,9 +314,31 @@ abstract class Kohana_Debugtoolbar {
 	 */
 	public static function get_files()
 	{
+		$result = array();
+		$result['list'] = array();
+		
 		$files = (array)get_included_files();
 		sort($files);
-		return $files;
+		
+		$total_size = 0;
+		$total_lines = 0;
+
+		foreach ($files as $file_name)
+		{
+			$size = filesize($file_name);
+			$lines = count(file($file_name));
+
+			$total_size += $size;
+			$total_lines += $lines;
+			$result['list'][] = array(
+				'name' => $file_name,
+				'size' => $size,
+				'lines' => $lines,
+			);
+		}
+		$result['total_size'] = $total_size;
+		$result['total_lines'] = $total_lines;
+		return $result;
 	}
 
 	/**
@@ -301,7 +348,19 @@ abstract class Kohana_Debugtoolbar {
 	 */
 	public static function get_modules()
 	{
-		return Kohana::modules();
+		$result = array();
+		$result['list'] = array();
+		$modules = Kohana::modules();
+
+		foreach ($modules as $name => $path)
+		{
+			$result['list'][] = array(
+				'name' => $name,
+				'path' => $path,
+				'abs_path' => realpath($path),
+			);
+		}
+		return $result;
 	}
 
 	/**
@@ -309,9 +368,19 @@ abstract class Kohana_Debugtoolbar {
 	 *
 	 * @return array
 	 */
-	public static function get_routes()
+	public static function get_routes($current_route)
 	{
-		return Route::all();
+		$result = array();
+		$result['list'] = array();
+		$routes = Route::all();
+		foreach($routes as $name => $route)
+		{
+			$result['list'][] = array(
+				'current' => $route == $current_route? 1 : 0,
+				'name' => $name,
+			);
+		}
+		return $result;
 	}
 
 	/**
