@@ -5,3 +5,8 @@ if (Kohana::$config->load('debug_toolbar.auto_render') === TRUE)
 {
 	register_shutdown_function('Debugtoolbar::render');
 }
+
+if (Kohana::$config->load('debug_toolbar.panels.logs') === TRUE)
+{
+	Kohana::$log->attach(new Log_DebugTool());
+}

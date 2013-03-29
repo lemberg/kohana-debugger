@@ -147,11 +147,16 @@ abstract class Kohana_Debugtoolbar {
 			$data['vars']['cookie'] = isset($_COOKIE) ? Debug::vars($_COOKIE) : Debug::vars(array());
 			$data['vars']['session'] = isset($_SESSION) ? Debug::vars($_SESSION) : Debug::vars(array());
 		}
+		
+		if ($config->panels['logs'] === TRUE)
+		{
+			$data['logs'] = Log_DebugTool::$logs;
+		}
 
 		$template->set('styles', $styles);
 		
 		$template->set('data', $data);
-
+		
 		echo $template->render();
 	}
 

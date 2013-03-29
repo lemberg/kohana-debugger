@@ -33,6 +33,7 @@ $config['panels'] = array(
 	'modules'			=> TRUE,
 	'routes'			=> TRUE,
 	'customs'           => TRUE,
+	'logs'				=> TRUE,
 );
 
 /*
