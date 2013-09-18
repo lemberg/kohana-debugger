@@ -1,50 +1,40 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-/*
- * If true, the debug toolbar will be automagically displayed
- * NOTE: if IN_PRODUCTION is set to TRUE, the toolbar will
- * not automatically render, even if auto_render is TRUE
- */
-$config['auto_render'] = Kohana::$environment > Kohana::PRODUCTION;
+return array(
+	/*
+	 * If true, the debug toolbar will be automagically displayed
+	 * NOTE: if IN_PRODUCTION is set to TRUE, the toolbar will
+	 * not automatically render, even if auto_render is TRUE
+	 */
+	'auto_render'    => Kohana::$environment > Kohana::PRODUCTION,
 
-/*
- * If true, the Debug toolbar will be displayed on page
- */
-$config['toolbar_enabled'] = true;
-/*
- * If true, the debug info will be displayed with Google Chrome Plugin
- */
-$config['plugin_enabled'] = true;
+	'toolbar' => array(
+		'enabled'    => FALSE,
+		'minimized'  => FALSE,
+		'aling'      => 'right' // right, left or center
+	),
 
-/*
- * If true, the toolbar will default to the minimized position
- */
-$config['toolbar']['minimized'] = FALSE;
+	'plugin' array(
+		'enabled'    => TRUE
+	),
 
-/*
- * Enable or disable specific panels
- */
-$config['panels'] = array(
-	'benchmarks'		=> TRUE,
-	'database'			=> TRUE,
-	'vars'				=> TRUE,
-	'ajax'				=> TRUE,
-	'files'				=> TRUE,
-	'modules'			=> TRUE,
-	'routes'			=> TRUE,
-	'customs'           => TRUE,
-	'logs'				=> TRUE,
+	/*
+	 * Enable or disable specific panels
+	 */
+	'panels' = array(
+		'benchmarks' => TRUE,
+		'database'   => TRUE,
+		'vars'       => TRUE,
+		'ajax'       => TRUE,
+		'files'      => TRUE,
+		'modules'    => TRUE,
+		'routes'     => TRUE,
+		'customs'    => TRUE,
+		'logs'       => TRUE
+	),
+
+	/*
+	 * Secret Key
+	 */
+	'secret_key'     => FALSE
 );
-
-/*
- * Toolbar alignment
- * options: right, left, center
- */
-$config['toolbar']['align'] = 'right';
-
-/*
- * Secret Key
- */
-$config['secret_key'] = FALSE;
-
-return $config;
