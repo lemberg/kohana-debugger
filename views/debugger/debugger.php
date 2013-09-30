@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.') ?>
 
-<?php if (Kohana::$config->load('debug_toolbar.plugin_enabled')): ?>
+<?php if (Kohana::$config->load('debugger.plugin.enabled')): ?>
 <div id="Kohana-DebugTool-JSON-data" nodata="<?php echo intval(!count($data)) ?>" style="display: none;">
 	<?php foreach($data as $key => $value): ?>
 		<div class="kohana-debug-tool-<?php echo $key ?>"><?php echo json_encode($value, JSON_HEX_TAG); ?></div>
@@ -8,7 +8,7 @@
 </div>
 <?php endif; ?>
 
-<?php if (Kohana::$config->load('debug_toolbar.toolbar_enabled')): ?>
+<?php if (Kohana::$config->load('debugger.toolbar.enabled')): ?>
 <!-- CSS styles (if not added to <head>) -->
 <?php if (isset($styles)): ?>
 	<?php echo $styles ?>

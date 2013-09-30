@@ -1,14 +1,14 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Kohana v3 Debug Toolbar
+ * Kohana v3 Debugger
  *
- * @package Debug Toolbar
+ * @package Debugger
  * @author  Aaron Forsander <http://grimhappy.com/>
  * @author  Ivan Brotkin (BIakaVeron) <BIakaVeron@gmail.com>
  * @author  Sergei Gladkovskiy <smgladkovskiy@gmail.com>
  */
-abstract class Kohana_Debugtoolbar {
+abstract class Kohana_Debugger {
 
 	/**
 	 * Queries container
@@ -43,102 +43,70 @@ abstract class Kohana_Debugtoolbar {
 	 *
 	 * @var string
 	 */
-	public static $benchmark_name = 'debug_toolbar';
+	public static $benchmark_name = 'debugger';
 
 	/**
-	 * Renders the Debug Toolbar
+	 * Renders the Debugger
 	 *
 	 * @static
 	 * @return bool|string
 	 */
-	public static function render()
+	public static function data()
 	{
-		if ( ! self::is_enabled())
+		if(!self::is_enabled())
 		{
 			return FALSE;
 		}
-		
-		$config = Kohana::$config->load('debug_toolbar');
-		if (!$config->toolbar_enabled && !$config->plugin_enabled)
+
+		$config = Kohana::$config->load('debugger');
+
+		if(!$config->toolbar['enabled'] && !$config->plugin['enabled'])
 		{
-			return false;
+			return FALSE;
 		}
 
-		$token    = Profiler::start('custom', self::$benchmark_name);
-
-		$template = new View('toolbar');
-
-		
-		
+		$token = Profiler::start('custom', self::$benchmark_name);
 		$data = array();
 
 		// Database panel
-		if ($config->panels['database'] === TRUE)
+		if($config->panels['database'] === TRUE && class_exists('Database'))
 		{
 			$data['queries'] = self::get_queries();
-			/*$template
-				->set('queries', $queries['data'])
-				->set('query_count', $queries['count'])
-				->set('total_time', $queries['time'])
-				->set('total_memory', $queries['memory']);*/
 		}
 
 		// Files panel
-		if ($config->panels['files'] === TRUE)
+		if($config->panels['files'] === TRUE)
 		{
 			$data['files'] = self::get_files();
-			//$template->set('files', $files);
 		}
 
 		// Modules panel
-		if ($config->panels['modules'] === TRUE)
+		if($config->panels['modules'] === TRUE)
 		{
 			$data['modules'] = self::get_modules();
-			//$template->set('modules', self::get_modules());
 		}
 
 		// Routes panel
-		if ($config->panels['routes'] === TRUE)
+		if($config->panels['routes'] === TRUE)
 		{
 			$data['routes'] = self::get_routes(Request::initial()->route());
-			//$template->set('routes', self::get_routes());
 		}
 
 		// Custom data
-		if ($config->panels['customs'] === TRUE)
+		if($config->panels['customs'] === TRUE)
 		{
 			$data['customs'] = self::get_customs();
-			//$template->set('customs', $customs);
 		}
-
-		// Set alignment for toolbar
-		switch ($config->toolbar["align"])
-		{
-			case 'right':
-			case 'center':
-			case 'left':
-				$template->set('align', $config->toolbar["align"]);
-				break;
-			default:
-				$template->set('align', 'left');
-		}
-		
-		// Javascript for toolbar
-		$template->set('scripts', file_get_contents(Kohana::find_file('views', 'toolbar', 'js')));
-
-		// CSS for toolbar
-		$styles = file_get_contents(Kohana::find_file('views', 'toolbar', 'css'));
 
 		Profiler::stop($token);
 
 		// Benchmarks panel
-		if ($config->panels['benchmarks'] === TRUE)
+		if($config->panels['benchmarks'] === TRUE)
 		{
 			$data['benchmarks'] = self::get_benchmarks();
-			//$template->set('benchmarks', self::get_benchmarks());
 		}
-		
-		if ($config->panels['vars'] === TRUE)
+
+		if($config->panels['vars'] === TRUE)
 		{
 			$data['vars']['post'] = isset($_POST) ? Debug::vars($_POST) : Debug::vars(array());
 			$data['vars']['get'] = isset($_GET) ? Debug::vars($_GET) : Debug::vars(array());
@@ -147,17 +115,13 @@ abstract class Kohana_Debugtoolbar {
 			$data['vars']['cookie'] = isset($_COOKIE) ? Debug::vars($_COOKIE) : Debug::vars(array());
 			$data['vars']['session'] = isset($_SESSION) ? Debug::vars($_SESSION) : Debug::vars(array());
 		}
-		
-		if ($config->panels['logs'] === TRUE)
+
+		if($config->panels['logs'] === TRUE)
 		{
-			$data['logs'] = Log_DebugTool::$logs;
+			$data['logs'] = Log_Debugger::instance()->getLogs();
 		}
 
-		$template->set('styles', $styles);
-		
-		$template->set('data', $data);
-		
-		echo $template->render();
+		return $data;
 	}
 
 	/**
@@ -184,7 +148,7 @@ abstract class Kohana_Debugtoolbar {
 
 		foreach (self::$_custom_tabs as $tab => $data)
 		{
-			if (is_array($data) OR is_object($data) OR is_bool($data))
+			if(is_array($data) OR is_object($data) OR is_bool($data))
 			{
 				$data = Debug::dump($data);
 			}
@@ -202,7 +166,7 @@ abstract class Kohana_Debugtoolbar {
 	 */
 	public static function get_queries()
 	{
-		if (self::$_queries !== FALSE)
+		if(self::$_queries !== FALSE)
 		{
 			return self::$_queries;
 		}
@@ -216,7 +180,7 @@ abstract class Kohana_Debugtoolbar {
 			$group_name = 'database ('.strtolower($name).')';
 			$group      = arr::get($groups, $group_name, FALSE);
 
-			if ($group)
+			if($group)
 			{
 				$sub_time = $sub_memory = $sub_count = 0;
 				foreach ($group as $query => $tokens)
@@ -258,23 +222,23 @@ abstract class Kohana_Debugtoolbar {
 	 */
 	public static function get_benchmarks()
 	{
-		if (Kohana::$profiling == FALSE)
+		if(Kohana::$profiling == FALSE)
 		{
 			return array();
 		}
 
-		if (self::$_benchmarks !== FALSE)
+		if(self::$_benchmarks !== FALSE)
 		{
 			return self::$_benchmarks;
 		}
 
 		$groups = Profiler::groups();
 		$result = array();
-		foreach (array_keys($groups) as $group)
+		foreach(array_keys($groups) as $group)
 		{
-			if (strpos($group, 'database (') === FALSE)
+			if(strpos($group, 'database (') === FALSE)
 			{
-				foreach ($groups[$group] as $name => $marks)
+				foreach($groups[$group] as $name => $marks)
 				{
 					$stats            = Profiler::stats($marks);
 					$result[$group][] = array
@@ -315,14 +279,14 @@ abstract class Kohana_Debugtoolbar {
 	{
 		$result = array();
 		$result['list'] = array();
-		
+
 		$files = (array)get_included_files();
 		sort($files);
-		
+
 		$total_size = 0;
 		$total_lines = 0;
 
-		foreach ($files as $file_name)
+		foreach($files as $file_name)
 		{
 			$size = filesize($file_name);
 			$lines = count(file($file_name));
@@ -351,7 +315,7 @@ abstract class Kohana_Debugtoolbar {
 		$result['list'] = array();
 		$modules = Kohana::modules();
 
-		foreach ($modules as $name => $path)
+		foreach($modules as $name => $path)
 		{
 			$result['list'][] = array(
 				'name' => $name,
@@ -412,40 +376,40 @@ abstract class Kohana_Debugtoolbar {
 	public static function is_enabled()
 	{
 		// disabled with Debugtoolbar::disable() call
-		if (self::$_enabled === FALSE) {
+		if(self::$_enabled === FALSE) {
 			return FALSE;
 		}
 
-		$config = Kohana::$config->load('debug_toolbar');
+		$config = Kohana::$config->load('debugger');
 
 		// Auto render if secret key isset
-		if ($config->secret_key !== FALSE AND isset($_GET[$config->secret_key]))
+		if($config->secret_key !== FALSE AND isset($_GET[$config->secret_key]))
 		{
 			return TRUE;
 		}
 
 		// Don't auto render when in PRODUCTION (this can obviously be
 		// overridden by the above secret key)
-		if (Kohana::$environment == Kohana::PRODUCTION)
+		if(Kohana::$environment == Kohana::PRODUCTION)
 		{
 			return FALSE;
 		}
 
 		// Don't auto render toolbar for ajax requests
-		if (Request::initial() === NULL OR Request::initial()->is_ajax())
+		if(Request::initial() === NULL OR Request::initial()->is_ajax())
 		{
 			return FALSE;
 		}
 
 		// Don't auto render toolbar for cli requests
-		if (PHP_SAPI == 'cli')
+		if(PHP_SAPI == 'cli')
 		{
 			return FALSE;
 		}
 
 		// Don't auto render toolbar if $_GET['debug'] = 'false'
-		if (isset($_GET['debug']) AND strtolower($_GET['debug']) == 'false')
-		{
+		if(Request::initial()->query('debug') == 'false')
+		{echo "2";
 			return FALSE;
 		}
 

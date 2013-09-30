@@ -11,17 +11,17 @@ return array(
 	'toolbar' => array(
 		'enabled'    => FALSE,
 		'minimized'  => FALSE,
-		'aling'      => 'right' // right, left or center
+		'align'      => 'right' // right, left or center
 	),
 
-	'plugin' array(
+	'plugin' => array(
 		'enabled'    => TRUE
 	),
 
 	/*
 	 * Enable or disable specific panels
 	 */
-	'panels' = array(
+	'panels' => array(
 		'benchmarks' => TRUE,
 		'database'   => TRUE,
 		'vars'       => TRUE,
