@@ -191,7 +191,7 @@ abstract class Kohana_Debugger {
 						$total           = Profiler::total($token);
 						$sub_time       += $total[0];
 						$sub_memory     += $total[1];
-						$result[$name][] = array(
+						$result[$name]['list'][] = array(
 							'name'   => $query,
 							'time'   => $total[0],
 							'memory' => $total[1]
@@ -290,6 +290,8 @@ abstract class Kohana_Debugger {
 		{
 			$size = filesize($file_name);
 			$lines = count(file($file_name));
+
+			$file_name = str_replace(array(SYSPATH, MODPATH, APPPATH), array('SYSPATH/', 'MODPATH/', 'APPPATH/'), $file_name);
 
 			$total_size += $size;
 			$total_lines += $lines;
