@@ -411,7 +411,7 @@ abstract class Kohana_Debugger {
 
 		// Don't auto render toolbar if $_GET['debug'] = 'false'
 		if(Request::initial()->query('debug') == 'false')
-		{echo "2";
+		{
 			return FALSE;
 		}
 
