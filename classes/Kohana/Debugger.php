@@ -398,7 +398,7 @@ abstract class Kohana_Debugger {
 		}
 
 		// Don't auto render toolbar for ajax requests
-		if(Request::initial() === NULL OR Request::initial()->is_ajax())
+		if(Request::initial() === NULL)
 		{
 			return FALSE;
 		}
